@@ -1,0 +1,1067 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MongoDB Schema Validator Simulator</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #0F1923;
+      color: #D8E8F3;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 32px 16px 56px;
+      gap: 18px;
+    }
+
+    /* ── Header ──────────────────────────────────────────── */
+    header { text-align: center; }
+
+    h1 {
+      font-size: 1.7rem;
+      font-weight: 800;
+      color: #fff;
+      letter-spacing: -0.025em;
+    }
+
+    .subtitle {
+      margin-top: 6px;
+      font-size: 0.88rem;
+      color: #90AEBF;
+    }
+
+    code {
+      font-family: 'SF Mono', 'Fira Code', monospace;
+      font-size: 0.83em;
+      background: #0A1E2B;
+      color: #00ED64;
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+
+    /* ── Cards ───────────────────────────────────────────── */
+    .card {
+      background: #182535;
+      border: 1px solid #26384A;
+      border-radius: 14px;
+      width: 100%;
+      max-width: 860px;
+    }
+
+    /* ── Diagram card ────────────────────────────────────── */
+    .diagram-card { padding: 20px 24px 24px; }
+
+    .flow-svg { width: 100%; height: auto; display: block; }
+
+    /* ── Controls separator ──────────────────────────────── */
+    .controls-sep {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin: 18px 0 16px;
+    }
+    .controls-sep::before,
+    .controls-sep::after {
+      content: '';
+      flex: 1;
+      border-top: 1px solid #263748;
+    }
+    .controls-sep-label {
+      font-size: 0.68rem;
+      font-weight: 700;
+      color: #4A6577;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      white-space: nowrap;
+    }
+
+    /* ── 3-column controls grid ──────────────────────────── */
+    .controls-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 0;
+    }
+
+    .ctrl-col {
+      padding: 0 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .ctrl-col:first-child { padding-left: 0; }
+    .ctrl-col:last-child  { padding-right: 0; }
+    .ctrl-col + .ctrl-col { border-left: 1px solid #1E2D3A; }
+
+    .ctrl-col-title {
+      font-size: 0.68rem;
+      font-weight: 700;
+      color: #4A6577;
+      text-transform: uppercase;
+      letter-spacing: 0.09em;
+      margin-bottom: 2px;
+    }
+
+    .ctrl-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .ctrl-group-label {
+      font-size: 0.7rem;
+      color: #6A8FA5;
+      font-family: 'SF Mono', 'Fira Code', monospace;
+    }
+
+    .btn-row { display: flex; gap: 6px; flex-wrap: wrap; }
+
+    .toggle {
+      padding: 6px 14px;
+      border-radius: 16px;
+      border: 1.5px solid #2E4457;
+      background: transparent;
+      color: #9BBDD2;
+      font-size: 0.8rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: border-color 0.15s, color 0.15s, background 0.15s;
+      font-family: inherit;
+    }
+    .toggle:hover { border-color: #00C957; color: #E0EAF3; }
+    .toggle.active {
+      background: #00ED64;
+      border-color: #00ED64;
+      color: #001E2B;
+      font-weight: 700;
+    }
+
+    /* Right column disabled state (insert mode) */
+    .ctrl-col-right.disabled {
+      opacity: 0.35;
+      pointer-events: none;
+    }
+    .ctrl-col-right .na-note {
+      font-size: 0.72rem;
+      color: #3D5266;
+      font-style: italic;
+      display: none;
+    }
+    .ctrl-col-right.disabled .na-note { display: block; }
+    .ctrl-col-right.disabled .ctrl-group { display: none; }
+
+    /* ── SVG node styles ─────────────────────────────────── */
+    .doc-rect  { fill: #0C2240; stroke: #4A8FE0; stroke-width: 2; }
+    .doc-line  { fill: #4A8FE0; }
+    .doc-label { fill: #7BB8F0; font-size: 13px; font-weight: 700; font-family: inherit; }
+
+    .hex-shape { fill: #1C1508; stroke: #D49A3C; stroke-width: 2; transition: stroke 0.3s, fill 0.3s, stroke-dasharray 0.3s; }
+    .hex-label { fill: #E8B45A; font-size: 12px; font-weight: 600; font-family: inherit; }
+
+    .cyl-body  { fill: #071F16; stroke: #00A854; stroke-width: 2; transition: stroke 0.3s; }
+    .cyl-cap   { fill: #0A2E1E; stroke: #00A854; stroke-width: 2; transition: stroke 0.3s; }
+    .cyl-label { fill: #00ED64; font-size: 12px; font-weight: 600; font-family: inherit; }
+
+    .err-rect  { fill: #200A0A; stroke: #AA2020; stroke-width: 2; transition: opacity 0.3s, stroke 0.3s; }
+    .err-label { fill: #E04040; font-size: 12px; font-weight: 600; font-family: inherit; transition: opacity 0.3s; }
+
+    .node-cap  { fill: #527A92; font-size: 10px; font-family: inherit; }
+
+    /* Arrows base */
+    .arrow { fill: none; stroke-width: 2.5; stroke-linecap: round; }
+    .arr-ok  { stroke: #2D74DA; opacity: 0.2; stroke-dasharray: 8 5; }
+    .arr-err { stroke: #8B1A1A; opacity: 0.15; stroke-dasharray: 8 5; }
+    .hd-ok   { fill: #2D74DA; opacity: 0.2; }
+    .hd-err  { fill: #8B1A1A; opacity: 0.15; }
+
+    /* Warn badge & bypass indicator */
+    .warn-badge      { opacity: 0; transition: opacity 0.25s; }
+    .bypass-indicator { opacity: 0; transition: opacity 0.25s; }
+
+    /* Error nodes dimmed by default */
+    .err-rect  { opacity: 0.2; }
+    .err-label { opacity: 0.2; }
+
+    /* ── State: ACCEPTED ──────────────────────────────────── */
+    .s-accepted .arr-ok  { stroke: #00ED64; opacity: 1; animation: flowDash 0.75s linear infinite; }
+    .s-accepted .hd-ok   { fill: #00ED64; opacity: 1; }
+    .s-accepted .cyl-body { stroke: #00ED64; }
+    .s-accepted .cyl-cap  { stroke: #00ED64; }
+
+    /* ── State: BYPASSED (teal) ───────────────────────────── */
+    .s-bypassed .arr-ok  { stroke: #00C4B4; opacity: 1; animation: flowDash 0.6s linear infinite; }
+    .s-bypassed .hd-ok   { fill: #00C4B4; opacity: 1; }
+    .s-bypassed .hex-shape {
+      stroke: #00C4B4;
+      stroke-dasharray: 7 4;
+      fill: #091A14;
+    }
+    .s-bypassed .hex-label { fill: #00C4B4; }
+    .s-bypassed .bypass-indicator { opacity: 1; }
+    .s-bypassed .cyl-body { stroke: #00C4B4; }
+    .s-bypassed .cyl-cap  { stroke: #00C4B4; }
+
+    /* ── State: WARNED ────────────────────────────────────── */
+    .s-warned .arr-ok   { stroke: #F5A623; opacity: 1; animation: flowDash 0.75s linear infinite; }
+    .s-warned .hd-ok    { fill: #F5A623; opacity: 1; }
+    .s-warned .warn-badge { opacity: 1; }
+    .s-warned .cyl-body { stroke: #F5A623; }
+    .s-warned .cyl-cap  { stroke: #F5A623; }
+
+    /* ── State: REJECTED ──────────────────────────────────── */
+    .s-rejected .arr-ok  { stroke: #CC3333; opacity: 0.3; }
+    .s-rejected .hd-ok   { fill: #CC3333; opacity: 0.3; }
+    .s-rejected .arr-err { stroke: #E74C3C; opacity: 1; animation: flowDash 0.75s linear infinite; }
+    .s-rejected .hd-err  { fill: #E74C3C; opacity: 1; }
+    .s-rejected .hex-shape  { stroke: #E74C3C; }
+    .s-rejected .active-dot { fill: #E74C3C; }
+    .s-rejected .err-rect   { opacity: 1; stroke: #E74C3C; }
+    .s-rejected .err-label  { opacity: 1; fill: #E74C3C; }
+
+    /* Bypassed: active dot turns teal */
+    .s-bypassed .active-dot { fill: #00C4B4; }
+
+    @keyframes flowDash { to { stroke-dashoffset: -26; } }
+
+    /* ── Existing doc in collection ───────────────────────── */
+    .existing-doc  { opacity: 0; transition: opacity 0.3s; }
+    .wt-update .existing-doc { opacity: 1; }
+
+    .exist-card { stroke-width: 1.5; transition: stroke 0.25s, fill 0.25s; }
+    .ev-valid   .exist-card { fill: #0C2240; stroke: #4A8FE0; }
+    .ev-invalid .exist-card { fill: #261508; stroke: #D49A3C; }
+
+    .exist-line { transition: fill 0.25s; }
+    .ev-valid   .exist-line { fill: #4A8FE0; }
+    .ev-invalid .exist-line { fill: #D49A3C; }
+
+    .exist-badge { transition: fill 0.25s; }
+    .ev-valid   .exist-badge { fill: #1A3D6E; }
+    .ev-invalid .exist-badge { fill: #42200A; }
+
+    .exist-badge-text { font-size: 8px; font-weight: 800; font-family: inherit; transition: fill 0.25s; }
+    .ev-valid   .exist-badge-text { fill: #90C5F0; }
+    .ev-invalid .exist-badge-text { fill: #E8B45A; }
+
+    .exist-status { font-size: 9px; font-weight: 600; font-family: inherit; }
+    .exist-status-valid   { fill: #7BB8F0; opacity: 0; transition: opacity 0.25s; }
+    .exist-status-invalid { fill: #D49A3C; opacity: 0; transition: opacity 0.25s; }
+    .ev-valid   .exist-status-valid   { opacity: 1; }
+    .ev-invalid .exist-status-invalid { opacity: 1; }
+
+    /* Result pills on existing doc */
+    .exist-result-ok,
+    .exist-result-bypassed,
+    .exist-result-warn,
+    .exist-result-no { opacity: 0; transition: opacity 0.3s; }
+
+    .wt-update.s-accepted  .exist-result-ok       { opacity: 1; }
+    .wt-update.s-bypassed  .exist-result-bypassed  { opacity: 1; }
+    .wt-update.s-warned    .exist-result-warn      { opacity: 1; }
+    .wt-update.s-rejected  .exist-result-no        { opacity: 1; }
+
+    /* ── Status card ──────────────────────────────────────── */
+    .status-card { padding: 22px 28px; }
+
+    .status-top {
+      display: flex;
+      align-items: flex-start;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .status-badge {
+      display: inline-block;
+      font-size: 1.1rem;
+      font-weight: 800;
+      padding: 8px 22px;
+      border-radius: 26px;
+      letter-spacing: -0.01em;
+      transition: background 0.25s, color 0.25s, border-color 0.25s;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    .status-badge.accepted { background: #002E17; color: #00ED64; border: 1.5px solid #00A854; }
+    .status-badge.bypassed { background: #00231F; color: #00C4B4; border: 1.5px solid #009D8E; }
+    .status-badge.warned   { background: #2A1A00; color: #F5A623; border: 1.5px solid #C9842A; }
+    .status-badge.rejected { background: #250808; color: #E74C3C; border: 1.5px solid #C0392B; }
+
+    .status-texts { flex: 1; min-width: 0; }
+
+    .status-expl {
+      font-size: 0.875rem;
+      color: #86AABF;
+      line-height: 1.65;
+    }
+    .status-expl strong { color: #C0D8E6; }
+    .status-expl em     { color: #A8C8D8; font-style: normal; font-weight: 600; }
+
+    .status-consequence {
+      margin-top: 8px;
+      font-size: 0.8rem;
+      color: #5A7A8A;
+      line-height: 1.5;
+      padding-left: 10px;
+      border-left: 2px solid #263748;
+    }
+    .status-consequence strong { color: #7A9AAA; }
+
+    /* Insight badge (⚡ powerful behavior) */
+    .insight-badge {
+      display: none;
+      margin-top: 10px;
+      padding: 8px 12px;
+      background: #001F1C;
+      border: 1px solid #00736A;
+      border-left: 3px solid #00C4B4;
+      border-radius: 6px;
+      font-size: 0.8rem;
+      color: #5AC4BC;
+      line-height: 1.5;
+    }
+    .insight-badge strong { color: #90D8D2; }
+    .insight-badge.visible { display: block; }
+    .insight-badge::before { content: '⚡ '; }
+
+    /* MongoDB command snippet */
+    .mongo-cmd {
+      margin-top: 14px;
+      border: 1px solid #1E2D3A;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    .mongo-cmd summary {
+      padding: 8px 14px;
+      font-size: 0.78rem;
+      color: #5D7A8E;
+      cursor: pointer;
+      background: #111D28;
+      user-select: none;
+      list-style: none;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .mongo-cmd summary::before { content: '▶'; font-size: 0.6rem; transition: transform 0.2s; }
+    .mongo-cmd[open] summary::before { transform: rotate(90deg); }
+    .mongo-cmd summary:hover { color: #90AEBF; }
+    .mongo-cmd pre {
+      margin: 0;
+      padding: 14px 16px;
+      background: #0A1520;
+      font-family: 'SF Mono', 'Fira Code', monospace;
+      font-size: 0.78rem;
+      color: #7EC8FF;
+      line-height: 1.7;
+      overflow-x: auto;
+    }
+    .cmd-key    { color: #9BCFFF; }
+    .cmd-str    { color: #00ED64; }
+    .cmd-comment { color: #3D5A6A; }
+
+    /* ── Footer ──────────────────────────────────────────── */
+    footer { font-size: 0.7rem; color: #3D5A6A; text-align: center; line-height: 1.8; }
+    footer a { color: #4E7A90; text-decoration: underline; }
+    footer a:hover { color: #7AAABF; }
+
+    /* ── Tooltip ─────────────────────────────────────────── */
+    #tooltip {
+      position: fixed;
+      background: #0C1E2B;
+      border: 1px solid #2A4055;
+      border-radius: 10px;
+      padding: 12px 16px;
+      font-size: 0.78rem;
+      color: #A8C8D8;
+      max-width: 290px;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.15s ease;
+      z-index: 200;
+      line-height: 1.6;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.55);
+    }
+    #tooltip.visible { opacity: 1; }
+    #tooltip strong { color: #E0EAF3; }
+    #tooltip code {
+      font-family: 'SF Mono', 'Fira Code', monospace;
+      font-size: 0.82em;
+      background: #0A1520;
+      color: #00ED64;
+      padding: 1px 5px;
+      border-radius: 3px;
+    }
+    .tip-row {
+      display: flex;
+      align-items: baseline;
+      gap: 8px;
+      margin-top: 5px;
+    }
+    .tip-label {
+      color: #4A6577;
+      font-size: 0.7rem;
+      font-family: 'SF Mono', 'Fira Code', monospace;
+      white-space: nowrap;
+    }
+    .tip-desc {
+      color: #5A7A8A;
+      font-size: 0.74rem;
+      margin-top: 4px;
+      line-height: 1.5;
+    }
+    .tip-node { cursor: help; }
+
+    /* ── Responsive ──────────────────────────────────────── */
+    @media (max-width: 600px) {
+      h1 { font-size: 1.3rem; }
+      .diagram-card { padding: 16px; }
+      .controls-grid { grid-template-columns: 1fr; gap: 14px; }
+      .ctrl-col + .ctrl-col { border-left: none; border-top: 1px solid #1E2D3A; padding-left: 0; padding-top: 14px; }
+      .status-top { flex-direction: column; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>MongoDB Schema Validator Simulator</h1>
+  <p class="subtitle">
+    Explore how <code>validationLevel</code> &amp; <code>validationAction</code>
+    handle valid and invalid writes
+  </p>
+</header>
+
+<!-- ── Diagram + Controls Card ──────────────────────────────────── -->
+<div class="card diagram-card">
+
+  <!--
+    SVG layout (viewBox 760 × 300):
+      Write-attempt doc : center x=88
+      Validator hexagon : center x=368, r=60
+      Collection cyl    : center x=610
+      Error box         : center x=368, y≈270
+
+    Hex vertices (flat-side, 0°=right):
+      (428,128)(398,180)(338,180)(308,128)(338,76)(398,76)
+  -->
+  <svg id="flow-svg" class="flow-svg" viewBox="0 0 760 300" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <marker id="mok"  markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto">
+        <polygon class="hd-ok"  points="0 0,9 3.5,0 7"/>
+      </marker>
+      <marker id="merr" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto">
+        <polygon class="hd-err" points="0 0,9 3.5,0 7"/>
+      </marker>
+    </defs>
+
+    <!-- ── Node captions ── -->
+    <text id="cap-write-type" class="node-cap" x="88"  y="42" text-anchor="middle">Insert</text>
+    <text id="cap-write-sub"  class="node-cap" x="88"  y="54" text-anchor="middle"
+          style="font-size:9px;fill:#365470;">new document</text>
+    <text class="node-cap" x="368" y="43" text-anchor="middle" style="font-size:11px;">Active Validator on Collection</text>
+    <text class="node-cap" x="368" y="57" text-anchor="middle" style="font-size:9px;fill:#2A5C40;">$jsonSchema · currently enforced</text>
+    <text class="node-cap" x="610" y="48" text-anchor="middle">MongoDB Collection</text>
+
+    <!-- ── Write-attempt document node ── -->
+    <g data-tip="doc" class="tip-node">
+      <rect class="doc-rect" x="20" y="63" width="136" height="122" rx="10"/>
+      <rect class="doc-line" x="40" y="82"  width="44" height="5" rx="2.5" opacity="0.55"/>
+      <rect class="doc-line" x="40" y="93"  width="32" height="5" rx="2.5" opacity="0.35"/>
+      <rect class="doc-line" x="40" y="104" width="38" height="5" rx="2.5" opacity="0.25"/>
+      <rect class="doc-line" x="40" y="115" width="28" height="5" rx="2.5" opacity="0.18"/>
+      <!-- Version badge (V1 for insert, V2 for update) — toggled by JS -->
+      <rect id="doc-version-badge" fill="#1A3D6E" x="21" y="64" width="26" height="15" rx="4"/>
+      <text id="doc-version-text" fill="#90C5F0" font-size="8" font-weight="800" font-family="inherit"
+            x="34" y="75" text-anchor="middle">V1</text>
+      <!-- Op label -->
+      <text id="doc-op-label" class="doc-label" x="88" y="154" text-anchor="middle">{ insert }</text>
+    </g>
+
+    <!-- ── Arrow 1: Doc → Validator ── -->
+    <path class="arrow arr-ok" d="M 158 124 L 303 124" marker-end="url(#mok)"/>
+
+    <!-- ── Validator hexagon ── -->
+    <g data-tip="validator" class="tip-node">
+      <polygon class="hex-shape" points="428,124 398,176 338,176 308,124 338,72 398,72"/>
+      <!-- Active indicator dot -->
+      <circle class="active-dot" cx="368" cy="96" r="4" fill="#00ED64" opacity="0.9"/>
+      <text class="hex-label" x="368" y="114" text-anchor="middle">Schema</text>
+      <text class="hex-label" x="368" y="131" text-anchor="middle">Validator</text>
+      <!-- Bypass indicator (teal, shown only in bypassed state) -->
+      <text class="bypass-indicator" fill="#00C4B4" font-size="10" font-weight="700"
+            font-family="inherit" x="368" y="153" text-anchor="middle">⤳ bypassed</text>
+    </g>
+
+    <!-- ── Arrow 2: Validator → Collection ── -->
+    <path class="arrow arr-ok" d="M 430 124 L 529 124" marker-end="url(#mok)"/>
+
+    <!-- ── Collection cylinder ──
+         Body rect  : x=532, y=80, w=156, h=96  → right=688, bottom=176
+         Top ellipse: cx=610, cy=80, rx=78, ry=17 → top≈y=63 (15px below caption at y=48)
+    -->
+    <g data-tip="collection" class="tip-node">
+      <rect class="cyl-body" x="532" y="80" width="156" height="96"/>
+      <ellipse class="cyl-cap" cx="610" cy="80" rx="78" ry="17"/>
+      <path class="cyl-body" d="M 532 176 Q 610 196 688 176" fill="none" stroke-width="2"/>
+      <text class="cyl-label" x="610" y="134" text-anchor="middle">Collection</text>
+      <!-- Warn badge — sits inside the top-right of the cylinder cap -->
+      <g class="warn-badge">
+        <circle fill="#F5A623" cx="681" cy="74" r="16"/>
+        <text fill="#1A0E00" font-size="13" font-weight="900" font-family="inherit"
+              x="681" y="80" text-anchor="middle">⚠</text>
+        <text fill="#F5A623" font-size="8" font-family="inherit"
+              x="681" y="97" text-anchor="middle">Warning</text>
+      </g>
+    </g>
+
+    <!-- ── Existing doc in collection (update mode only) ──
+         Positioned overlapping the cylinder's left edge (x=532):
+         card x=497–555, so 35px hangs outside, 23px inside.
+    -->
+    <g class="existing-doc" data-tip="existing-doc" style="cursor:help">
+      <rect fill="#000" opacity="0.35" x="501" y="99" width="58" height="72" rx="8"/>
+      <rect class="exist-card"  x="497" y="95"  width="58" height="72" rx="7"/>
+      <rect class="exist-line"  x="506" y="107" width="32" height="3.5" rx="1.75" opacity="0.7"/>
+      <rect class="exist-line"  x="506" y="115" width="24" height="3.5" rx="1.75" opacity="0.5"/>
+      <rect class="exist-line"  x="506" y="123" width="28" height="3.5" rx="1.75" opacity="0.35"/>
+      <rect class="exist-line"  x="506" y="131" width="18" height="3.5" rx="1.75" opacity="0.2"/>
+      <rect class="exist-badge" x="498" y="96"  width="24" height="14" rx="4"/>
+      <text class="exist-badge-text" x="510" y="106" text-anchor="middle">V1</text>
+      <text class="exist-status exist-status-valid"   x="526" y="153" text-anchor="middle">✓ valid</text>
+      <text class="exist-status exist-status-invalid" x="526" y="153" text-anchor="middle">⚠ invalid</text>
+      <!-- Result pills (sit just below the cylinder bottom at y=176) -->
+      <g class="exist-result-ok">
+        <rect fill="#002E17" x="481" y="178" width="92" height="16" rx="8"/>
+        <text fill="#00ED64" font-size="9" font-weight="700" font-family="inherit"
+              x="527" y="190" text-anchor="middle">✓ updated → V2</text>
+      </g>
+      <g class="exist-result-bypassed">
+        <rect fill="#001F1C" x="477" y="178" width="100" height="16" rx="8"/>
+        <text fill="#00C4B4" font-size="9" font-weight="700" font-family="inherit"
+              x="527" y="190" text-anchor="middle">⤳ updated (bypassed)</text>
+      </g>
+      <g class="exist-result-warn">
+        <rect fill="#2E1C00" x="475" y="178" width="104" height="16" rx="8"/>
+        <text fill="#F5A623" font-size="9" font-weight="700" font-family="inherit"
+              x="527" y="190" text-anchor="middle">⚠ updated + warned</text>
+      </g>
+      <g class="exist-result-no">
+        <rect fill="#280808" x="481" y="178" width="92" height="16" rx="8"/>
+        <text fill="#E74C3C" font-size="9" font-weight="700" font-family="inherit"
+              x="527" y="190" text-anchor="middle">✗ write blocked</text>
+      </g>
+    </g>
+
+    <!-- ── Arrow 3: Validator → Error ── -->
+    <path class="arrow arr-err" d="M 368 177 L 368 238" marker-end="url(#merr)"/>
+
+    <!-- ── Error box ── -->
+    <g data-tip="error" class="tip-node">
+      <rect class="err-rect" x="258" y="241" width="220" height="52" rx="8"/>
+      <text class="err-label" x="368" y="263" text-anchor="middle"
+            font-size="13" font-family="inherit" font-weight="700">Write Rejected</text>
+      <text class="err-label" x="368" y="280" text-anchor="middle"
+            font-size="11" font-family="inherit">✗ WriteError returned to client</text>
+    </g>
+
+  </svg>
+
+  <!-- ── Controls separator ── -->
+  <div class="controls-sep">
+    <span class="controls-sep-label">Simulator Controls</span>
+  </div>
+
+  <!-- ── 3-column controls ── -->
+  <div class="controls-grid">
+
+    <!-- Left: Write operation (under doc) -->
+    <div class="ctrl-col ctrl-col-left">
+      <div class="ctrl-col-title">Write Attempt</div>
+
+      <div class="ctrl-group">
+        <span class="ctrl-group-label">operation</span>
+        <div class="btn-row">
+          <button class="toggle active" data-group="op" data-value="insert"
+                  title="A new document being inserted for the first time">Insert</button>
+          <button class="toggle" data-group="op" data-value="update"
+                  title="Modifying a document that already exists in the collection">Update</button>
+        </div>
+      </div>
+
+      <div class="ctrl-group">
+        <span class="ctrl-group-label">write document</span>
+        <div class="btn-row">
+          <button class="toggle active" data-group="writeValidity" data-value="valid"
+                  title="The document being written satisfies all rules in the current schema">Valid</button>
+          <button class="toggle" data-group="writeValidity" data-value="invalid"
+                  title="The document being written violates one or more rules in the current schema">Invalid</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Middle: Validator config (under hex) -->
+    <div class="ctrl-col ctrl-col-mid">
+      <div class="ctrl-col-title">Active Validator Config</div>
+
+      <div class="ctrl-group">
+        <span class="ctrl-group-label">validationLevel</span>
+        <div class="btn-row">
+          <button class="toggle active" data-group="level" data-value="strict"
+                  title="strict: ALL writes are validated — inserts and updates to any document">strict</button>
+          <button class="toggle" data-group="level" data-value="moderate"
+                  title="moderate: Inserts + updates to currently-valid docs are validated. Updates to already-invalid docs bypass validation.">moderate</button>
+        </div>
+      </div>
+
+      <div class="ctrl-group">
+        <span class="ctrl-group-label">validationAction</span>
+        <div class="btn-row">
+          <button class="toggle active" data-group="action" data-value="error"
+                  title="error: Reject the write and return a WriteError to the application">error</button>
+          <button class="toggle" data-group="action" data-value="warn"
+                  title="warn: Allow the write, store the document, and log a warning in the MongoDB log">warn</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right: Collection state (under cylinder) -->
+    <div class="ctrl-col ctrl-col-right" id="ctrl-col-right">
+      <div class="ctrl-col-title">Collection State</div>
+      <p class="na-note">N/A — no existing document<br>for an insert</p>
+
+      <div class="ctrl-group">
+        <span class="ctrl-group-label">existing document</span>
+        <div class="btn-row">
+          <button class="toggle active" data-group="existingValidity" data-value="valid"
+                  title="The document already stored in the collection conforms to the current schema">Valid</button>
+          <button class="toggle" data-group="existingValidity" data-value="invalid"
+                  title="The document already stored in the collection violates the current schema (e.g. written before validation was enabled)">Invalid</button>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /controls-grid -->
+</div><!-- /diagram-card -->
+
+<!-- ── Status Card ───────────────────────────────────────────────── -->
+<div class="card status-card">
+  <div class="status-top">
+    <div id="status-badge" class="status-badge accepted">Accepted ✓</div>
+    <div class="status-texts">
+      <div id="status-expl" class="status-expl">
+        A valid document always passes validation regardless of
+        <strong>validationLevel</strong> or <strong>validationAction</strong>.
+      </div>
+      <div id="status-consequence" class="status-consequence">
+        <strong>Application:</strong> receives a success response. Document is stored.
+      </div>
+    </div>
+  </div>
+
+  <div id="insight-badge" class="insight-badge"></div>
+
+  <details class="mongo-cmd" id="mongo-cmd">
+    <summary>Equivalent MongoDB command</summary>
+    <pre id="cmd-snippet"></pre>
+  </details>
+</div>
+
+<div id="tooltip"></div>
+
+<footer>
+  <div style="margin-bottom:6px">
+    MongoDB Schema Validator Simulator &nbsp;·&nbsp;
+    <a href="https://www.mongodb.com/docs/manual/core/schema-validation/" target="_blank" rel="noopener">
+      MongoDB Docs: Schema Validation
+    </a>
+    &nbsp;·&nbsp; Last updated: March 5, 2026
+  </div>
+  <div>
+    Author: <a href="https://www.linkedin.com/in/robert-richter-27b46812b/" target="_blank" rel="noopener">Robert Richter</a>
+    &nbsp;·&nbsp; <span style="font-style:italic">Implemented by AI. Designed, reviewed and iterated by human.</span>
+  </div>
+</footer>
+
+<script>
+  // ── State ──────────────────────────────────────────────────────────────────
+  const state = {
+    op:               'insert',  // 'insert' | 'update'
+    writeValidity:    'valid',   // 'valid' | 'invalid'
+    existingValidity: 'valid',   // 'valid' | 'invalid' (only for update)
+    level:            'strict',  // 'strict' | 'moderate'
+    action:           'error',   // 'error'  | 'warn'
+  };
+
+  // ── Outcome definitions ────────────────────────────────────────────────────
+  // r:           'accepted' | 'bypassed' | 'warned' | 'rejected'
+  // msg:         main explanation
+  // consequence: application-layer impact
+  // insight:     '' or a ⚡ powerful-behavior callout (no risk framing)
+  //
+  // Key: `${op}|${writeValidity}|${existingValidity}|${level}|${action}`
+  // For insert, existingValidity is ignored — we normalise it to 'any' in the key.
+
+  const outcomes = {
+
+    // ── INSERT — valid write ────────────────────────────────────────────────
+    'insert|valid|strict|error': {
+      r: 'accepted',
+      msg: 'A <strong>valid document</strong> passes every rule in the schema. With <strong>strict + error</strong> the write is fully validated and accepted.',
+      consequence: '<strong>Application:</strong> receives a success response. Document is stored.',
+      insight: '',
+    },
+    'insert|valid|strict|warn': {
+      r: 'accepted',
+      msg: 'A <strong>valid document</strong> passes the schema. <strong>warn</strong> mode only triggers a log entry when a violation occurs — nothing to log here.',
+      consequence: '<strong>Application:</strong> receives a success response. Document is stored.',
+      insight: '',
+    },
+    'insert|valid|moderate|error': {
+      r: 'accepted',
+      msg: 'A <strong>valid document</strong> passes the schema. Inserts are always fully validated under <strong>moderate</strong>, and this one passes cleanly.',
+      consequence: '<strong>Application:</strong> receives a success response. Document is stored.',
+      insight: '',
+    },
+    'insert|valid|moderate|warn': {
+      r: 'accepted',
+      msg: 'A <strong>valid document</strong> passes the schema. Validator configuration has no effect on a write that satisfies all rules.',
+      consequence: '<strong>Application:</strong> receives a success response. Document is stored.',
+      insight: '',
+    },
+
+    // ── INSERT — invalid write ──────────────────────────────────────────────
+    'insert|invalid|strict|error': {
+      r: 'rejected',
+      msg: '<strong>strict + error</strong>: Every insert is validated. The document violates the schema — the write is <strong>rejected</strong> and a <code>WriteError</code> is returned.',
+      consequence: '<strong>Application:</strong> receives a WriteError and must handle it (retry with a valid document, surface the error, etc.).',
+      insight: '',
+    },
+    'insert|invalid|strict|warn': {
+      r: 'warned',
+      msg: '<strong>strict + warn</strong>: The insert is validated and fails the schema. Instead of rejecting, MongoDB <strong>stores the document</strong> and writes a warning to the server log. The application receives a success response.',
+      consequence: '<strong>Application:</strong> receives a success response — it has no way to know a violation occurred without inspecting the MongoDB log.',
+      insight: 'The write IS stored. warn mode never blocks writes — it only logs. Use this when you need visibility into violations without impacting write availability.',
+    },
+    'insert|invalid|moderate|error': {
+      r: 'rejected',
+      msg: '<strong>moderate + error</strong>: Inserts are <em>always</em> fully validated under <strong>moderate</strong> — just like strict. The document violates the schema and is <strong>rejected</strong>.',
+      consequence: '<strong>Application:</strong> receives a WriteError and must handle it.',
+      insight: 'moderate does not bypass validation for inserts. The bypass capability of moderate applies exclusively to <em>updates of already-invalid documents</em>.',
+    },
+    'insert|invalid|moderate|warn': {
+      r: 'warned',
+      msg: '<strong>moderate + warn</strong>: Inserts are <em>always</em> fully validated under <strong>moderate</strong>. The document violates the schema, but <strong>warn</strong> action stores it and logs a warning instead of rejecting.',
+      consequence: '<strong>Application:</strong> receives a success response — violation is only visible in the MongoDB server log.',
+      insight: 'moderate does not bypass validation for inserts. Only updates to already-invalid documents are bypassed. The combination of moderate + warn is useful for observing violations during a migration without blocking any writes.',
+    },
+
+    // ── UPDATE — valid write + valid existing ───────────────────────────────
+    'update|valid|valid|strict|error': {
+      r: 'accepted',
+      msg: 'A <strong>valid update</strong> to a <strong>valid existing document</strong> — the cleanest path. <strong>strict</strong> validates the write and it passes.',
+      consequence: '<strong>Application:</strong> receives a success response. Document is updated.',
+      insight: '',
+    },
+    'update|valid|valid|strict|warn': {
+      r: 'accepted',
+      msg: 'A <strong>valid update</strong> to a <strong>valid existing document</strong>. <strong>warn</strong> mode only fires when there is a violation — nothing to log here.',
+      consequence: '<strong>Application:</strong> receives a success response. Document is updated.',
+      insight: '',
+    },
+    'update|valid|valid|moderate|error': {
+      r: 'accepted',
+      msg: 'A <strong>valid update</strong> to a <strong>valid existing document</strong>. Under <strong>moderate</strong>, the existing doc is valid, so validation is applied — and the update passes it.',
+      consequence: '<strong>Application:</strong> receives a success response. Document is updated.',
+      insight: '',
+    },
+    'update|valid|valid|moderate|warn': {
+      r: 'accepted',
+      msg: 'A <strong>valid update</strong> to a <strong>valid existing document</strong>. Under <strong>moderate</strong>, the existing doc is valid so validation runs — the update passes cleanly.',
+      consequence: '<strong>Application:</strong> receives a success response. Document is updated.',
+      insight: '',
+    },
+
+    // ── UPDATE — invalid write + valid existing ─────────────────────────────
+    'update|invalid|valid|strict|error': {
+      r: 'rejected',
+      msg: '<strong>strict + error</strong>: The existing document was valid, so validation is applied to this update. The write violates the schema — <strong>rejected</strong>.',
+      consequence: '<strong>Application:</strong> receives a WriteError. The existing document is unchanged.',
+      insight: '',
+    },
+    'update|invalid|valid|strict|warn': {
+      r: 'warned',
+      msg: '<strong>strict + warn</strong>: The update is validated (existing doc was valid) and fails the schema. <strong>warn</strong> action stores the update and logs the violation — the document is now technically invalid.',
+      consequence: '<strong>Application:</strong> receives a success response. The document is updated but now violates the schema. Violation is visible in the MongoDB server log.',
+      insight: 'After this write, the collection contains a document that fails validation. If you later switch to strict + error, updates to that document will be blocked until it is remediated.',
+    },
+    'update|invalid|valid|moderate|error': {
+      r: 'rejected',
+      msg: '<strong>moderate + error</strong>: The existing document was valid, so <strong>moderate</strong> applies full validation to this update. The write violates the schema — <strong>rejected</strong>.',
+      consequence: '<strong>Application:</strong> receives a WriteError. The existing document is unchanged.',
+      insight: '',
+    },
+    'update|invalid|valid|moderate|warn': {
+      r: 'warned',
+      msg: '<strong>moderate + warn</strong>: The existing document was valid, so validation is applied. The write violates the schema — <strong>warn</strong> action stores it and logs a warning.',
+      consequence: '<strong>Application:</strong> receives a success response. The document is updated but now violates the schema.',
+      insight: '',
+    },
+
+    // ── UPDATE — valid write + invalid existing ─────────────────────────────
+    'update|valid|invalid|strict|error': {
+      r: 'accepted',
+      msg: '<strong>strict + error</strong>: Under <strong>strict</strong>, all updates are validated regardless of the existing document\'s state. The write is valid — it passes and the document is improved.',
+      consequence: '<strong>Application:</strong> receives a success response. The document is updated and now conforms to the schema.',
+      insight: '',
+    },
+    'update|valid|invalid|strict|warn': {
+      r: 'accepted',
+      msg: '<strong>strict + warn</strong>: All updates are validated under <strong>strict</strong>. The write is valid — no violation to warn about.',
+      consequence: '<strong>Application:</strong> receives a success response. The document is updated and now conforms to the schema.',
+      insight: '',
+    },
+    'update|valid|invalid|moderate|error': {
+      r: 'accepted',
+      msg: '<strong>moderate</strong>: The existing document was already invalid, so validation is skipped for this update. The write goes through — and since it is also valid, the outcome is the same as under strict: <strong>accepted</strong>.',
+      consequence: '<strong>Application:</strong> receives a success response. Document is updated.',
+      insight: '',
+    },
+    'update|valid|invalid|moderate|warn': {
+      r: 'accepted',
+      msg: '<strong>moderate</strong>: The existing document was already invalid, so validation is skipped. The write is valid regardless, so both strict and moderate accept it — no warning is logged because no violation occurred.',
+      consequence: '<strong>Application:</strong> receives a success response. Document is updated.',
+      insight: '',
+    },
+
+    // ── UPDATE — invalid write + invalid existing ───────────────────────────
+    'update|invalid|invalid|strict|error': {
+      r: 'rejected',
+      msg: '<strong>strict + error</strong>: Under <strong>strict</strong>, ALL updates are validated regardless of the existing document\'s state. The write violates the schema — <strong>rejected</strong>.',
+      consequence: '<strong>Application:</strong> receives a WriteError. The existing document is unchanged.',
+      insight: '',
+    },
+    'update|invalid|invalid|strict|warn': {
+      r: 'warned',
+      msg: '<strong>strict + warn</strong>: All updates are validated under <strong>strict</strong>. The write violates the schema — <strong>warn</strong> action stores it and logs the violation.',
+      consequence: '<strong>Application:</strong> receives a success response. Document is updated, still invalid. Violation is visible in the MongoDB server log.',
+      insight: '',
+    },
+    'update|invalid|invalid|moderate|error': {
+      r: 'bypassed',
+      msg: '<strong>moderate</strong>: The existing document was already invalid, so validation is <em>intentionally bypassed</em>. The write goes through — even though both the existing document and the incoming write violate the schema.',
+      consequence: '<strong>Application:</strong> receives a success response. Document is updated and remains schema-invalid.',
+      insight: 'This is moderate\'s most powerful behaviour: it gives you <strong>unconditional write availability</strong> for documents with pre-existing schema violations. During a schema migration this means your application never gets blocked by legacy invalid data — you can remediate on your own schedule.',
+    },
+    'update|invalid|invalid|moderate|warn': {
+      r: 'bypassed',
+      msg: '<strong>moderate</strong>: The existing document was already invalid, so validation is <em>intentionally bypassed</em>. No check runs, so no warning is generated either.',
+      consequence: '<strong>Application:</strong> receives a success response. Document is updated and remains schema-invalid. No log entry is written.',
+      insight: 'With moderate + warn, bypass takes precedence over warn — the write is never checked, so warn has nothing to act on. This is the most permissive combination: full write availability for pre-existing invalid data, with zero log noise.',
+    },
+
+  };
+
+  // ── DOM refs ───────────────────────────────────────────────────────────────
+  const svg              = document.getElementById('flow-svg');
+  const statusBadge      = document.getElementById('status-badge');
+  const statusExpl       = document.getElementById('status-expl');
+  const statusConsequence= document.getElementById('status-consequence');
+  const insightEl        = document.getElementById('insight-badge');
+  const capWriteType     = document.getElementById('cap-write-type');
+  const capWriteSub      = document.getElementById('cap-write-sub');
+  const docOpLabel       = document.getElementById('doc-op-label');
+  const docVersionBadge  = document.getElementById('doc-version-badge');
+  const docVersionText   = document.getElementById('doc-version-text');
+  const ctrlColRight     = document.getElementById('ctrl-col-right');
+  const cmdSnippet       = document.getElementById('cmd-snippet');
+
+  // ── Render ─────────────────────────────────────────────────────────────────
+  function render() {
+    const { op, writeValidity, existingValidity, level, action } = state;
+
+    // Build lookup key — existingValidity only relevant for update
+    const key = op === 'insert'
+      ? `insert|${writeValidity}|${level}|${action}`
+      : `update|${writeValidity}|${existingValidity}|${level}|${action}`;
+
+    const o = outcomes[key];
+    if (!o) return;
+
+    // SVG classes: state + write-type + existing-validity
+    svg.className.baseVal =
+      `flow-svg s-${o.r} wt-${op} ev-${existingValidity}`;
+
+    // Status badge
+    const labels = {
+      accepted: 'Accepted ✓',
+      bypassed: 'Accepted — Bypassed ⤳',
+      warned:   'Accepted with Warning ⚠',
+      rejected: 'Rejected ✗',
+    };
+    statusBadge.textContent = labels[o.r];
+    statusBadge.className   = `status-badge ${o.r}`;
+
+    // Explanation + consequence
+    statusExpl.innerHTML        = o.msg;
+    statusConsequence.innerHTML = o.consequence;
+
+    // Insight badge
+    if (o.insight) {
+      insightEl.innerHTML = o.insight;
+      insightEl.classList.add('visible');
+    } else {
+      insightEl.innerHTML = '';
+      insightEl.classList.remove('visible');
+    }
+
+    // MongoDB command snippet
+    cmdSnippet.innerHTML = buildCmd(level, action);
+
+    // Write-attempt doc label, caption and version badge
+    const isUpdate = op === 'update';
+    capWriteType.textContent = isUpdate ? 'Update'            : 'Insert';
+    capWriteSub.textContent  = isUpdate ? 'modified document' : 'new document';
+    docOpLabel.textContent   = isUpdate ? '{ update }'        : '{ insert }';
+    // Insert = V1 (first write under current schema); Update = V2 (revised document)
+    docVersionText.textContent             = isUpdate ? 'V2' : 'V1';
+    docVersionBadge.setAttribute('fill',     isUpdate ? '#1A3D6E' : '#163D1A');
+    docVersionText.setAttribute('fill',      isUpdate ? '#90C5F0' : '#6ECC80');
+
+    // Right column: disabled for insert
+    ctrlColRight.classList.toggle('disabled', !isUpdate);
+  }
+
+  // ── MongoDB command builder ────────────────────────────────────────────────
+  function buildCmd(level, action) {
+    return [
+      `<span class="cmd-comment">// Apply validator settings to an existing collection</span>`,
+      `db.runCommand({`,
+      `  collMod:          <span class="cmd-str">"myCollection"</span>,`,
+      `  validator:        { <span class="cmd-str">$jsonSchema</span>: { <span class="cmd-comment">/* your schema */</span> } },`,
+      `  <span class="cmd-key">validationLevel</span>:  <span class="cmd-str">"${level}"</span>,`,
+      `  <span class="cmd-key">validationAction</span>: <span class="cmd-str">"${action}"</span>,`,
+      `})`,
+      ``,
+      `<span class="cmd-comment">// Or set it at collection creation time</span>`,
+      `db.createCollection(<span class="cmd-str">"myCollection"</span>, {`,
+      `  validator:        { <span class="cmd-str">$jsonSchema</span>: { <span class="cmd-comment">/* your schema */</span> } },`,
+      `  <span class="cmd-key">validationLevel</span>:  <span class="cmd-str">"${level}"</span>,`,
+      `  <span class="cmd-key">validationAction</span>: <span class="cmd-str">"${action}"</span>,`,
+      `})`,
+    ].join('\n');
+  }
+
+  // ── Tooltip ────────────────────────────────────────────────────────────────
+  const tooltipEl = document.getElementById('tooltip');
+
+  function badge(v) {
+    return v === 'valid'
+      ? '<span style="color:#00ED64;font-weight:700">✓ valid</span>'
+      : '<span style="color:#D49A3C;font-weight:700">⚠ invalid</span>';
+  }
+
+  function getTooltipHTML(tipId) {
+    const { op, writeValidity, existingValidity, level, action } = state;
+
+    const levelDesc = {
+      strict:   'All inserts and all updates are validated, regardless of existing document state.',
+      moderate: 'Inserts and updates to currently-valid documents are validated. Updates to already-invalid documents bypass validation entirely.',
+    };
+    const actionDesc = {
+      error: 'A violating write is <strong>rejected</strong> — a WriteError is returned to the application.',
+      warn:  'A violating write is <strong>stored</strong> but a warning is written to the MongoDB server log. The application receives a success response.',
+    };
+
+    switch (tipId) {
+      case 'doc':
+        return `
+          <strong>${op === 'insert' ? 'Insert' : 'Update'} — Write Attempt</strong>
+          <div class="tip-row"><span class="tip-label">operation</span>${op === 'insert' ? 'New document, never stored before' : 'Modifying an existing document'}</div>
+          <div class="tip-row"><span class="tip-label">write doc</span>${badge(writeValidity)} against current schema</div>
+        `;
+
+      case 'validator':
+        return `
+          <strong>Active $jsonSchema Validator</strong>
+          <div class="tip-row"><span class="tip-label">validationLevel</span><code>${level}</code></div>
+          <div class="tip-desc">${levelDesc[level]}</div>
+          <div class="tip-row" style="margin-top:8px"><span class="tip-label">validationAction</span><code>${action}</code></div>
+          <div class="tip-desc">${actionDesc[action]}</div>
+        `;
+
+      case 'collection':
+        if (op === 'insert') {
+          return `
+            <strong>MongoDB Collection</strong>
+            <div class="tip-desc">No existing document — this is a new insert. The existing document state is irrelevant.</div>
+          `;
+        }
+        return `
+          <strong>MongoDB Collection</strong>
+          <div class="tip-row"><span class="tip-label">existing doc</span>${badge(existingValidity)} against current schema</div>
+          <div class="tip-desc">${existingValidity === 'invalid'
+            ? 'This document was written before validation was enforced (or under looser rules). It currently violates the schema.'
+            : 'This document conforms to the current schema rules.'}</div>
+        `;
+
+      case 'existing-doc':
+        return `
+          <strong>Existing Document in Collection (V1)</strong>
+          <div class="tip-row"><span class="tip-label">state</span>${badge(existingValidity)}</div>
+          <div class="tip-desc">${existingValidity === 'invalid'
+            ? 'Already stored but violates the current schema. Under <strong>moderate</strong>, updates to this document bypass validation entirely — giving you write availability during migrations.'
+            : 'Conforms to the current schema. Under both <strong>strict</strong> and <strong>moderate</strong>, updates to this document are fully validated.'}</div>
+        `;
+
+      case 'error':
+        return `
+          <strong>Write Rejected</strong>
+          <div class="tip-desc">A <code>WriteError</code> is returned to the application. The document is <em>not</em> stored. Any existing document in the collection is left unchanged.</div>
+        `;
+    }
+    return '';
+  }
+
+  function positionTooltip(x, y) {
+    const tw = tooltipEl.offsetWidth;
+    const th = tooltipEl.offsetHeight;
+    let left = x + 16;
+    let top  = y + 16;
+    if (left + tw > window.innerWidth  - 12) left = x - tw - 16;
+    if (top  + th > window.innerHeight - 12) top  = y - th - 16;
+    tooltipEl.style.left = left + 'px';
+    tooltipEl.style.top  = top  + 'px';
+  }
+
+  // Attach tooltip listeners to all [data-tip] SVG groups
+  document.querySelectorAll('[data-tip]').forEach(el => {
+    el.addEventListener('mousemove', e => {
+      tooltipEl.innerHTML = getTooltipHTML(el.dataset.tip);
+      tooltipEl.classList.add('visible');
+      positionTooltip(e.clientX, e.clientY);
+    });
+    el.addEventListener('mouseleave', () => {
+      tooltipEl.classList.remove('visible');
+    });
+  });
+
+  // ── Toggle handlers ────────────────────────────────────────────────────────
+  document.querySelectorAll('.toggle').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const { group, value } = btn.dataset;
+      document.querySelectorAll(`.toggle[data-group="${group}"]`)
+        .forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      state[group] = value;
+      render();
+    });
+  });
+
+  render();
+</script>
+</body>
+</html>
