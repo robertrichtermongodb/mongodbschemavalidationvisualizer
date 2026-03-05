@@ -155,9 +155,13 @@
     .ctrl-col-right.disabled .ctrl-group { display: none; }
 
     /* ── SVG node styles ─────────────────────────────────── */
-    .doc-rect  { fill: #0C2240; stroke: #4A8FE0; stroke-width: 2; }
-    .doc-line  { fill: #4A8FE0; }
-    .doc-label { fill: #7BB8F0; font-size: 13px; font-weight: 700; font-family: inherit; }
+    .doc-rect  { fill: #0C2240; stroke: #4A8FE0; stroke-width: 2; transition: fill 0.25s, stroke 0.25s; }
+    .doc-line  { fill: #4A8FE0; transition: fill 0.25s; }
+    .doc-label { fill: #7BB8F0; font-size: 13px; font-weight: 700; font-family: inherit; transition: fill 0.25s; }
+
+    .wv-invalid .doc-rect  { fill: #261508; stroke: #D49A3C; }
+    .wv-invalid .doc-line  { fill: #D49A3C; }
+    .wv-invalid .doc-label { fill: #E8B45A; }
 
     .hex-shape { fill: #1C1508; stroke: #D49A3C; stroke-width: 2; transition: stroke 0.3s, fill 0.3s, stroke-dasharray 0.3s; }
     .hex-label { fill: #E8B45A; font-size: 12px; font-weight: 600; font-family: inherit; }
@@ -894,7 +898,7 @@
 
     // SVG classes: state + write-type + existing-validity
     svg.className.baseVal =
-      `flow-svg s-${o.r} wt-${op} ev-${existingValidity}`;
+      `flow-svg s-${o.r} wt-${op} ev-${existingValidity} wv-${writeValidity}`;
 
     // Status badge
     const labels = {
@@ -928,9 +932,10 @@
     capWriteSub.textContent  = isUpdate ? 'modified document' : 'new document';
     docOpLabel.textContent   = isUpdate ? '{ update }'        : '{ insert }';
     // Insert = V1 (first write under current schema); Update = V2 (revised document)
-    docVersionText.textContent             = isUpdate ? 'V2' : 'V1';
-    docVersionBadge.setAttribute('fill',     isUpdate ? '#1A3D6E' : '#163D1A');
-    docVersionText.setAttribute('fill',      isUpdate ? '#90C5F0' : '#6ECC80');
+    const docInvalid = writeValidity === 'invalid';
+    docVersionText.textContent         = isUpdate ? 'V2' : 'V1';
+    docVersionBadge.setAttribute('fill', docInvalid ? '#42200A' : (isUpdate ? '#1A3D6E' : '#163D1A'));
+    docVersionText.setAttribute('fill',  docInvalid ? '#E8B45A' : (isUpdate ? '#90C5F0' : '#6ECC80'));
 
     // Right column: disabled for insert
     ctrlColRight.classList.toggle('disabled', !isUpdate);
@@ -1009,14 +1014,45 @@
             : 'This document conforms to the current schema rules.'}</div>
         `;
 
-      case 'existing-doc':
+      case 'existing-doc': {
+        const lookupKey = `update|${writeValidity}|${existingValidity}|${level}|${action}`;
+        const thisOutcome = outcomes[lookupKey];
+        const result = thisOutcome ? thisOutcome.r : null;
+
+        let existDesc;
+        if (existingValidity === 'invalid') {
+          if (level === 'moderate') {
+            existDesc = 'Already stored but violates the current schema. Under <strong>moderate</strong>, updates to this document <em>bypass validation entirely</em> — MongoDB intentionally skips the check to give you write availability for legacy data during migrations.';
+          } else {
+            existDesc = 'Already stored but violates the current schema. Under <strong>strict</strong>, every write is validated regardless of the existing document\'s state — this update will still be checked against the schema and '
+              + (action === 'error' ? '<strong>rejected</strong> if the new version violates it.' : '<strong>stored with a server-log warning</strong> if the new version violates it.');
+          }
+        } else {
+          existDesc = 'Conforms to the current schema. Under <strong>' + level + '</strong>, updates to a valid document are always validated — the incoming write must also conform to pass.';
+        }
+
+        let outcomeDesc = '';
+        if (result === 'bypassed') {
+          outcomeDesc = writeValidity === 'invalid'
+            ? 'V1 <strong>will be overwritten</strong> by V2. Validation is bypassed — no check runs. V2 is stored and the document <strong>remains schema-invalid</strong> in the collection.'
+            : 'V1 <strong>will be overwritten</strong> by V2. Validation is bypassed, but V2 happens to be valid — the collection ends up with a conforming document.';
+        } else if (result === 'accepted') {
+          outcomeDesc = 'V1 <strong>will be overwritten</strong> by a valid V2. The collection will hold a schema-conforming document.';
+        } else if (result === 'warned') {
+          outcomeDesc = writeValidity === 'invalid'
+            ? 'V1 <strong>will be overwritten</strong> by V2. Despite the violation, the write is stored — V2 is now in the collection and <strong>is schema-invalid</strong>. A warning is written to the server log.'
+            : 'V1 <strong>will be overwritten</strong> by a valid V2. The write passes — V2 is stored cleanly.';
+        } else if (result === 'rejected') {
+          outcomeDesc = 'V1 <strong>will NOT be overwritten</strong>. The write is blocked — V1 stays unchanged in the collection.';
+        }
+
         return `
           <strong>Existing Document in Collection (V1)</strong>
           <div class="tip-row"><span class="tip-label">state</span>${badge(existingValidity)}</div>
-          <div class="tip-desc">${existingValidity === 'invalid'
-            ? 'Already stored but violates the current schema. Under <strong>moderate</strong>, updates to this document bypass validation entirely — giving you write availability during migrations.'
-            : 'Conforms to the current schema. Under both <strong>strict</strong> and <strong>moderate</strong>, updates to this document are fully validated.'}</div>
+          <div class="tip-desc">${existDesc}</div>
+          ${outcomeDesc ? `<div class="tip-desc" style="margin-top:6px;border-top:1px solid #1E3040;padding-top:6px"><span style="font-size:0.72rem;font-weight:700;color:#527A92;text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:3px">outcome →</span>${outcomeDesc}</div>` : ''}
         `;
+      }
 
       case 'error':
         return `
