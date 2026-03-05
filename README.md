@@ -63,3 +63,9 @@ Just open `index.html` in any modern browser. No server, no build tool, no depen
 **Robert Richter** · [LinkedIn](https://www.linkedin.com/in/robert-richter-27b46812b/)
 
 *Implemented by AI. Designed, reviewed and iterated by human.*
+
+---
+
+## Disclaimer
+
+> ⚠ This simulator may contain inaccuracies and could become outdated. Validated against **MongoDB 8** — always consult the [official MongoDB documentation](https://www.mongodb.com/docs/manual/core/schema-validation/) before applying these behaviours in production.

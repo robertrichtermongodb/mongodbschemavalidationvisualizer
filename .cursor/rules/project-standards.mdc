@@ -1,0 +1,17 @@
+---
+description: Core coding standards for this project
+alwaysApply: true
+---
+
+# Project Standards
+
+## Browser Compatibility
+- All code must work in the **latest stable versions** of Chrome, Firefox, and Safari.
+- No vendor-prefixed CSS or non-standard JS APIs without a cross-browser fallback.
+- Test SVG, CSS transitions/animations, and JS features against all three engines.
+
+## Versioning
+- At the **start of a new working session** (first edit of the session), copy the current `index.html` to `previous_iterations/index-vN.html` (increment N from the highest existing version).
+- Do **not** create a new version copy for subsequent edits within the same session.
+- The root `index.html` always holds the latest version.
+- Never delete previous iterations.
