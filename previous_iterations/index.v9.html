@@ -232,8 +232,8 @@
     @keyframes flowDash { to { stroke-dashoffset: -26; } }
 
     /* ── Existing doc in collection ───────────────────────── */
-    .existing-doc  { opacity: 0; transition: opacity 0.3s; pointer-events: none; }
-    .wt-update .existing-doc { opacity: 1; pointer-events: auto; }
+    .existing-doc  { opacity: 0; transition: opacity 0.3s; }
+    .wt-update .existing-doc { opacity: 1; }
 
     .exist-card { stroke-width: 1.5; transition: stroke 0.25s, fill 0.25s; }
     .ev-valid   .exist-card { fill: #0C2240; stroke: #4A8FE0; }
@@ -512,14 +512,14 @@
       <ellipse class="cyl-cap" cx="610" cy="80" rx="78" ry="17"/>
       <path class="cyl-body" d="M 532 176 Q 610 196 688 176" fill="none" stroke-width="2"/>
       <text class="cyl-label" x="610" y="134" text-anchor="middle">Collection</text>
-    </g>
-    <!-- Warn badge — sibling of collection group to avoid tooltip event bubbling -->
-    <g class="warn-badge" data-tip="warn-badge" style="cursor:help">
-      <circle fill="#F5A623" cx="681" cy="74" r="16"/>
-      <text fill="#1A0E00" font-size="13" font-weight="900" font-family="inherit"
-            x="681" y="80" text-anchor="middle">⚠</text>
-      <text fill="#F5A623" font-size="8" font-family="inherit"
-            x="681" y="97" text-anchor="middle">Warning</text>
+      <!-- Warn badge — sits inside the top-right of the cylinder cap -->
+      <g class="warn-badge">
+        <circle fill="#F5A623" cx="681" cy="74" r="16"/>
+        <text fill="#1A0E00" font-size="13" font-weight="900" font-family="inherit"
+              x="681" y="80" text-anchor="middle">⚠</text>
+        <text fill="#F5A623" font-size="8" font-family="inherit"
+              x="681" y="97" text-anchor="middle">Warning</text>
+      </g>
     </g>
 
     <!-- ── Existing doc in collection (update mode only) ──
@@ -1059,22 +1059,10 @@
         `;
       }
 
-      case 'warn-badge':
-        return `
-          <strong>Write Stored — Validation Warning</strong>
-          <div class="tip-desc">The document <em>was</em> stored despite violating the schema. MongoDB writes a structured warning entry to the <strong>server log</strong> (not returned to the application).</div>
-          <div class="tip-desc" style="margin-top:6px;border-top:1px solid #1E3040;padding-top:6px">
-            <div class="tip-row"><span class="tip-label">app sees</span><span style="color:#00ED64;font-weight:700">success</span> — no error, no hint of the violation</div>
-            <div class="tip-row"><span class="tip-label">log entry</span>MongoDB server log, e.g. via:</div>
-            <div style="margin-top:3px;padding-left:4px"><code style="word-break:break-all">db.adminCommand({getLog:"global"})</code></div>
-            <div class="tip-row"><span class="tip-label">document</span>stored as-is, schema-invalid, queryable like any other document</div>
-          </div>
-        `;
-
       case 'error':
         return `
           <strong>Write Rejected</strong>
-          <div class="tip-desc">A <code>WriteError</code> is returned to the application. The document is <em>not</em> stored.${op === 'update' ? ' The existing document in the collection is left unchanged.' : ''}</div>
+          <div class="tip-desc">A <code>WriteError</code> is returned to the application. The document is <em>not</em> stored. Any existing document in the collection is left unchanged.</div>
         `;
     }
     return '';
