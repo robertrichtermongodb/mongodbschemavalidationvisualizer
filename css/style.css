@@ -1,0 +1,788 @@
+/* ── Theme tokens ─────────────────────────────────────── */
+:root {
+  /* Surfaces */
+  --pageBg: #F0F4F8;
+  --cardBg: #FFFFFF;
+  --inputBg: #F0F4F8;
+  --codeBg: #F4F6F9;
+  --cmdHeaderBg: #EDF0F4;
+
+  /* Borders */
+  --border: #CCD4E0;
+  --borderSubtle: #DEE4EC;
+
+  /* Text */
+  --text: #2A3A4A;
+  --textBright: #0A1520;
+  --textSecondary: #5A7080;
+  --textStrong: #1A3040;
+  --textEm: #2A4050;
+  --textMuted: #6A7A8A;
+  --textTertiary: #5A7088;
+  --textDim: #8A98A8;
+  --textDisabled: #A0AEB8;
+
+  /* Toggle */
+  --toggleBorder: #BCC8D4;
+  --toggleText: #5A7080;
+  --toggleHoverText: #1A2A3A;
+  --toggleActiveBg: #00A854;
+  --toggleActiveText: #FFFFFF;
+  --toggleActiveBorder: #00A854;
+
+  /* Accent: Green */
+  --green: #00A854;
+  --greenHover: #009040;
+  --greenDark: #E0F5E8;
+
+  /* Accent: Teal */
+  --teal: #009D8E;
+  --tealDark: #E0F5F0;
+
+  /* Accent: Amber */
+  --amber: #C88A15;
+  --amberDark: #FFF4E0;
+
+  /* Accent: Red */
+  --red: #D03030;
+  --redDark: #FDE8E8;
+  --redDim: #C04040;
+
+  /* Accent: Blue */
+  --blue: #1878A8;
+  --blueLt: #2088B8;
+
+  /* Status badges */
+  --acceptedBg: #E0F5E8;
+  --acceptedText: #00A854;
+  --acceptedBorder: #00A854;
+  --bypassedBg: #E0F5F0;
+  --bypassedText: #009D8E;
+  --bypassedBorder: #008878;
+  --warnedBg: #FFF4E0;
+  --warnedText: #C88A15;
+  --warnedBorder: #B07A10;
+  --rejectedBg: #FDE8E8;
+  --rejectedText: #D03030;
+  --rejectedBorder: #B02020;
+
+  /* Insight badge */
+  --insightBg: #E8F8F4;
+  --insightBorder: #00A89A;
+  --insightBorderLeft: #009D8E;
+  --insightText: #007A6A;
+  --insightStrong: #005A4A;
+
+  /* Footer */
+  --footerText: #8A98A8;
+  --footerLink: #4A7A90;
+  --footerLinkHover: #2A5A70;
+  --footerBorder: #DEE4EC;
+
+  /* Tooltip */
+  --tooltipBg: #FFFFFF;
+  --tooltipBorder: #CCD4E0;
+  --tooltipShadow: 0 10px 30px rgba(0,0,0,0.10);
+  --tooltipCodeBg: #F0F4F8;
+
+  /* MongoDB command */
+  --cmdBorder: #DEE4EC;
+  --cmdCodeText: #1878A8;
+  --cmdKey: #2088B8;
+  --cmdStr: #00A854;
+  --cmdComment: #8A98A8;
+
+  /* SVG nodes */
+  --svgDocFill: #E0EEFA;
+  --svgDocStroke: #4A8FE0;
+  --svgDocLine: #4A8FE0;
+  --svgDocLabel: #2A6AB0;
+  --svgDocInvFill: #FFF0D8;
+  --svgDocInvStroke: #D49A3C;
+  --svgDocInvLabel: #A07020;
+  --svgHexFill: #FFF8E8;
+  --svgHexStroke: #C89030;
+  --svgHexLabel: #A07020;
+  --svgCylBody: #E0F5E8;
+  --svgCylCap: #D0F0D8;
+  --svgCylStroke: #00A854;
+  --svgCylLabel: #00A854;
+  --svgErrFill: #FDE8E8;
+  --svgErrStroke: #C02020;
+  --svgErrLabel: #D03030;
+  --svgNodeCap: #7A8FA0;
+  --svgSubCap: #6A8A9A;
+  --svgValidatorSub: #3A8060;
+
+  /* SVG arrows (idle) */
+  --svgArrOk: #4A90D9;
+  --svgArrErr: #C06060;
+  --svgHdOk: #4A90D9;
+  --svgHdErr: #C06060;
+
+  /* SVG active dot */
+  --activeDot: #00A854;
+
+  /* SVG bypassed hex fill */
+  --bypHexFill: #E0F5F0;
+
+  /* SVG rejected dim */
+  --stRejDimArrow: #CC3333;
+
+  /* Existing doc */
+  --evValidFill: #E0EEFA;
+  --evValidStroke: #4A8FE0;
+  --evValidLine: #4A8FE0;
+  --evValidBadge: #C0D8F0;
+  --evValidBadgeText: #2A5A90;
+  --evValidStatus: #2A6AB0;
+  --evInvalidFill: #FFF0D8;
+  --evInvalidStroke: #D49A3C;
+  --evInvalidLine: #D49A3C;
+  --evInvalidBadge: #F0DCC0;
+  --evInvalidBadgeText: #8A6020;
+  --evInvalidStatus: #A07020;
+  --evShadowFill: rgba(0,0,0,0.08);
+
+  /* Warn badge */
+  --warnBadgeIcon: #1A0E00;
+
+  /* Version badge (JS-controlled) */
+  --vbValidInsertBg: #D0F0D0;
+  --vbValidInsertText: #00804A;
+  --vbValidUpdateBg: #C0D8F0;
+  --vbValidUpdateText: #2A5A90;
+  --vbInvalidBg: #F0DCC0;
+  --vbInvalidText: #8A6020;
+}
+
+[data-theme="dark"] {
+  /* Surfaces */
+  --pageBg: #0F1923;
+  --cardBg: #182535;
+  --inputBg: #0A1E2B;
+  --codeBg: #0A1520;
+  --cmdHeaderBg: #111D28;
+
+  /* Borders */
+  --border: #26384A;
+  --borderSubtle: #1E2D3A;
+
+  /* Text */
+  --text: #D8E8F3;
+  --textBright: #ffffff;
+  --textSecondary: #90AEBF;
+  --textStrong: #C0D8E6;
+  --textEm: #A8C8D8;
+  --textMuted: #4A6577;
+  --textTertiary: #6A8FA5;
+  --textDim: #5A7A8A;
+  --textDisabled: #3D5266;
+
+  /* Toggle */
+  --toggleBorder: #2E4457;
+  --toggleText: #9BBDD2;
+  --toggleHoverText: #E0EAF3;
+  --toggleActiveBg: #00ED64;
+  --toggleActiveText: #001E2B;
+  --toggleActiveBorder: #00ED64;
+
+  /* Accent: Green */
+  --green: #00ED64;
+  --greenHover: #00C957;
+  --greenDark: #002E17;
+
+  /* Accent: Teal */
+  --teal: #00C4B4;
+  --tealDark: #00231F;
+
+  /* Accent: Amber */
+  --amber: #F5A623;
+  --amberDark: #2A1A00;
+
+  /* Accent: Red */
+  --red: #E74C3C;
+  --redDark: #250808;
+  --redDim: #CC3333;
+
+  /* Accent: Blue */
+  --blue: #7EC8FF;
+  --blueLt: #9BCFFF;
+
+  /* Status badges */
+  --acceptedBg: #002E17;
+  --acceptedText: #00ED64;
+  --acceptedBorder: #00A854;
+  --bypassedBg: #00231F;
+  --bypassedText: #00C4B4;
+  --bypassedBorder: #009D8E;
+  --warnedBg: #2A1A00;
+  --warnedText: #F5A623;
+  --warnedBorder: #C9842A;
+  --rejectedBg: #250808;
+  --rejectedText: #E74C3C;
+  --rejectedBorder: #C0392B;
+
+  /* Insight badge */
+  --insightBg: #001F1C;
+  --insightBorder: #00736A;
+  --insightBorderLeft: #00C4B4;
+  --insightText: #5AC4BC;
+  --insightStrong: #90D8D2;
+
+  /* Footer */
+  --footerText: #3D5A6A;
+  --footerLink: #4E7A90;
+  --footerLinkHover: #7AAABF;
+  --footerBorder: #1E2D3A;
+
+  /* Tooltip */
+  --tooltipBg: #0C1E2B;
+  --tooltipBorder: #2A4055;
+  --tooltipShadow: 0 10px 30px rgba(0,0,0,0.55);
+  --tooltipCodeBg: #0A1520;
+
+  /* MongoDB command */
+  --cmdBorder: #1E2D3A;
+  --cmdCodeText: #7EC8FF;
+  --cmdKey: #9BCFFF;
+  --cmdStr: #00ED64;
+  --cmdComment: #3D5A6A;
+
+  /* SVG nodes */
+  --svgDocFill: #0C2240;
+  --svgDocStroke: #4A8FE0;
+  --svgDocLine: #4A8FE0;
+  --svgDocLabel: #7BB8F0;
+  --svgDocInvFill: #261508;
+  --svgDocInvStroke: #D49A3C;
+  --svgDocInvLabel: #E8B45A;
+  --svgHexFill: #1C1508;
+  --svgHexStroke: #D49A3C;
+  --svgHexLabel: #E8B45A;
+  --svgCylBody: #071F16;
+  --svgCylCap: #0A2E1E;
+  --svgCylStroke: #00A854;
+  --svgCylLabel: #00ED64;
+  --svgErrFill: #200A0A;
+  --svgErrStroke: #AA2020;
+  --svgErrLabel: #E04040;
+  --svgNodeCap: #527A92;
+  --svgSubCap: #365470;
+  --svgValidatorSub: #2A5C40;
+
+  /* SVG arrows (idle) */
+  --svgArrOk: #2D74DA;
+  --svgArrErr: #8B1A1A;
+  --svgHdOk: #2D74DA;
+  --svgHdErr: #8B1A1A;
+
+  /* SVG active dot */
+  --activeDot: #00ED64;
+
+  /* SVG bypassed hex fill */
+  --bypHexFill: #091A14;
+
+  /* SVG rejected dim */
+  --stRejDimArrow: #CC3333;
+
+  /* Existing doc */
+  --evValidFill: #0C2240;
+  --evValidStroke: #4A8FE0;
+  --evValidLine: #4A8FE0;
+  --evValidBadge: #1A3D6E;
+  --evValidBadgeText: #90C5F0;
+  --evValidStatus: #7BB8F0;
+  --evInvalidFill: #261508;
+  --evInvalidStroke: #D49A3C;
+  --evInvalidLine: #D49A3C;
+  --evInvalidBadge: #42200A;
+  --evInvalidBadgeText: #E8B45A;
+  --evInvalidStatus: #D49A3C;
+  --evShadowFill: rgba(0,0,0,0.35);
+
+  /* Warn badge */
+  --warnBadgeIcon: #1A0E00;
+
+  /* Version badge (JS-controlled) */
+  --vbValidInsertBg: #163D1A;
+  --vbValidInsertText: #6ECC80;
+  --vbValidUpdateBg: #1A3D6E;
+  --vbValidUpdateText: #90C5F0;
+  --vbInvalidBg: #42200A;
+  --vbInvalidText: #E8B45A;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: var(--pageBg);
+  color: var(--text);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 32px 16px 56px;
+  gap: 18px;
+  transition: background 0.3s, color 0.3s;
+}
+
+/* ── Header ──────────────────────────────────────────── */
+header { text-align: center; }
+
+h1 {
+  font-size: 1.7rem;
+  font-weight: 800;
+  color: var(--textBright);
+  letter-spacing: -0.025em;
+}
+
+.subtitle {
+  margin-top: 6px;
+  font-size: 0.88rem;
+  color: var(--textSecondary);
+}
+
+code {
+  font-family: 'SF Mono', 'Fira Code', monospace;
+  font-size: 0.83em;
+  background: var(--inputBg);
+  color: var(--green);
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+/* ── Theme toggle ─────────────────────────────────────── */
+.theme-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 1.5px solid var(--border);
+  background: var(--cardBg);
+  color: var(--textSecondary);
+  font-size: 1.1rem;
+  cursor: pointer;
+  transition: border-color 0.15s, color 0.15s, background 0.15s;
+  margin-left: 8px;
+  vertical-align: middle;
+  padding: 0;
+  line-height: 1;
+}
+.theme-toggle:hover { border-color: var(--green); color: var(--textBright); }
+
+/* ── Cards ───────────────────────────────────────────── */
+.card {
+  background: var(--cardBg);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  width: 100%;
+  max-width: 860px;
+  transition: background 0.3s, border-color 0.3s;
+}
+
+/* ── Diagram card ────────────────────────────────────── */
+.diagram-card { padding: 20px 24px 24px; }
+
+.flow-svg { width: 100%; height: auto; display: block; }
+
+/* ── Controls separator ──────────────────────────────── */
+.controls-sep {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 18px 0 16px;
+}
+.controls-sep::before,
+.controls-sep::after {
+  content: '';
+  flex: 1;
+  border-top: 1px solid var(--borderSubtle);
+}
+.controls-sep-label {
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: var(--textMuted);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  white-space: nowrap;
+}
+
+/* ── 3-column controls grid ──────────────────────────── */
+.controls-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 0;
+}
+
+.ctrl-col {
+  padding: 0 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.ctrl-col:first-child { padding-left: 0; }
+.ctrl-col:last-child  { padding-right: 0; }
+.ctrl-col + .ctrl-col { border-left: 1px solid var(--borderSubtle); }
+
+.ctrl-col-title {
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: var(--textMuted);
+  text-transform: uppercase;
+  letter-spacing: 0.09em;
+  margin-bottom: 2px;
+}
+
+.ctrl-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.ctrl-group-label {
+  font-size: 0.7rem;
+  color: var(--textTertiary);
+  font-family: 'SF Mono', 'Fira Code', monospace;
+}
+
+.btn-row { display: flex; gap: 6px; flex-wrap: wrap; }
+
+.toggle {
+  padding: 6px 14px;
+  border-radius: 16px;
+  border: 1.5px solid var(--toggleBorder);
+  background: transparent;
+  color: var(--toggleText);
+  font-size: 0.8rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: border-color 0.15s, color 0.15s, background 0.15s;
+  font-family: inherit;
+}
+.toggle:hover { border-color: var(--green); color: var(--toggleHoverText); }
+.toggle.active {
+  background: var(--toggleActiveBg);
+  border-color: var(--toggleActiveBorder);
+  color: var(--toggleActiveText);
+  font-weight: 700;
+}
+
+/* Right column disabled state (insert mode) */
+.ctrl-col-right.disabled {
+  opacity: 0.35;
+  pointer-events: none;
+}
+.ctrl-col-right .na-note {
+  font-size: 0.72rem;
+  color: var(--textDisabled);
+  font-style: italic;
+  display: none;
+}
+.ctrl-col-right.disabled .na-note { display: block; }
+.ctrl-col-right.disabled .ctrl-group { display: none; }
+
+/* ── SVG node styles ─────────────────────────────────── */
+.doc-rect  { fill: var(--svgDocFill); stroke: var(--svgDocStroke); stroke-width: 2; transition: fill 0.25s, stroke 0.25s; }
+.doc-line  { fill: var(--svgDocLine); transition: fill 0.25s; }
+.doc-label { fill: var(--svgDocLabel); font-size: 13px; font-weight: 700; font-family: inherit; transition: fill 0.25s; }
+
+.wv-invalid .doc-rect  { fill: var(--svgDocInvFill); stroke: var(--svgDocInvStroke); }
+.wv-invalid .doc-line  { fill: var(--svgDocInvStroke); }
+.wv-invalid .doc-label { fill: var(--svgDocInvLabel); }
+
+.hex-shape { fill: var(--svgHexFill); stroke: var(--svgHexStroke); stroke-width: 2; transition: stroke 0.3s, fill 0.3s, stroke-dasharray 0.3s; }
+.hex-label { fill: var(--svgHexLabel); font-size: 12px; font-weight: 600; font-family: inherit; }
+
+.cyl-body  { fill: var(--svgCylBody); stroke: var(--svgCylStroke); stroke-width: 2; transition: stroke 0.3s; }
+.cyl-cap   { fill: var(--svgCylCap); stroke: var(--svgCylStroke); stroke-width: 2; transition: stroke 0.3s; }
+.cyl-label { fill: var(--svgCylLabel); font-size: 12px; font-weight: 600; font-family: inherit; }
+
+.err-rect  { fill: var(--svgErrFill); stroke: var(--svgErrStroke); stroke-width: 2; transition: opacity 0.3s, stroke 0.3s; }
+.err-label { fill: var(--svgErrLabel); font-size: 12px; font-weight: 600; font-family: inherit; transition: opacity 0.3s; }
+
+.node-cap  { fill: var(--svgNodeCap); font-size: 10px; font-family: inherit; }
+
+/* Arrows base */
+.arrow { fill: none; stroke-width: 2.5; stroke-linecap: round; }
+.arr-ok  { stroke: var(--svgArrOk); opacity: 0.2; stroke-dasharray: 8 5; }
+.arr-err { stroke: var(--svgArrErr); opacity: 0.15; stroke-dasharray: 8 5; }
+.hd-ok   { fill: var(--svgHdOk); opacity: 0.2; }
+.hd-err  { fill: var(--svgHdErr); opacity: 0.15; }
+
+/* SVG inline element overrides */
+.active-dot { fill: var(--activeDot); }
+.bypass-indicator { fill: var(--teal); }
+.warn-badge circle { fill: var(--amber); }
+.warn-badge text:first-of-type { fill: var(--warnBadgeIcon); }
+.warn-badge text:last-of-type { fill: var(--amber); }
+
+/* Version badge (driven by SVG state classes) */
+.wv-valid.wt-insert #doc-version-badge { fill: var(--vbValidInsertBg); }
+.wv-valid.wt-insert #doc-version-text { fill: var(--vbValidInsertText); }
+.wv-valid.wt-update #doc-version-badge { fill: var(--vbValidUpdateBg); }
+.wv-valid.wt-update #doc-version-text { fill: var(--vbValidUpdateText); }
+.wv-invalid #doc-version-badge { fill: var(--vbInvalidBg); }
+.wv-invalid #doc-version-text { fill: var(--vbInvalidText); }
+
+/* Existing doc inline SVG overrides */
+.existing-doc rect.ev-shadow { fill: var(--evShadowFill); }
+.ev-valid   .exist-card { fill: var(--evValidFill); stroke: var(--evValidStroke); }
+.ev-invalid .exist-card { fill: var(--evInvalidFill); stroke: var(--evInvalidStroke); }
+.ev-valid   .exist-line { fill: var(--evValidLine); }
+.ev-invalid .exist-line { fill: var(--evInvalidLine); }
+.ev-valid   .exist-badge { fill: var(--evValidBadge); }
+.ev-invalid .exist-badge { fill: var(--evInvalidBadge); }
+.ev-valid   .exist-badge-text { fill: var(--evValidBadgeText); }
+.ev-invalid .exist-badge-text { fill: var(--evInvalidBadgeText); }
+.exist-status-valid   { fill: var(--evValidStatus); }
+.exist-status-invalid { fill: var(--evInvalidStatus); }
+
+/* Result pill overrides */
+.exist-result-ok rect { fill: var(--greenDark); }
+.exist-result-ok text { fill: var(--green); }
+.exist-result-bypassed rect { fill: var(--tealDark); }
+.exist-result-bypassed text { fill: var(--teal); }
+.exist-result-warn rect { fill: var(--amberDark); }
+.exist-result-warn text { fill: var(--amber); }
+.exist-result-no rect { fill: var(--redDark); }
+.exist-result-no text { fill: var(--red); }
+
+/* Warn badge & bypass indicator */
+.warn-badge      { opacity: 0; transition: opacity 0.25s; }
+.bypass-indicator { opacity: 0; transition: opacity 0.25s; }
+
+/* Error nodes dimmed by default */
+.err-rect  { opacity: 0.2; }
+.err-label { opacity: 0.2; }
+
+/* ── State: ACCEPTED ──────────────────────────────────── */
+.s-accepted .arr-ok  { stroke: var(--green); opacity: 1; animation: flowDash 0.75s linear infinite; }
+.s-accepted .hd-ok   { fill: var(--green); opacity: 1; }
+.s-accepted .cyl-body { stroke: var(--green); }
+.s-accepted .cyl-cap  { stroke: var(--green); }
+
+/* ── State: BYPASSED (teal) ───────────────────────────── */
+.s-bypassed .arr-ok  { stroke: var(--teal); opacity: 1; animation: flowDash 0.6s linear infinite; }
+.s-bypassed .hd-ok   { fill: var(--teal); opacity: 1; }
+.s-bypassed .hex-shape {
+  stroke: var(--teal);
+  stroke-dasharray: 7 4;
+  fill: var(--bypHexFill);
+}
+.s-bypassed .hex-label { fill: var(--teal); }
+.s-bypassed .bypass-indicator { opacity: 1; }
+.s-bypassed .cyl-body { stroke: var(--teal); }
+.s-bypassed .cyl-cap  { stroke: var(--teal); }
+
+/* ── State: WARNED ────────────────────────────────────── */
+.s-warned .arr-ok   { stroke: var(--amber); opacity: 1; animation: flowDash 0.75s linear infinite; }
+.s-warned .hd-ok    { fill: var(--amber); opacity: 1; }
+.s-warned .warn-badge { opacity: 1; }
+.s-warned .cyl-body { stroke: var(--amber); }
+.s-warned .cyl-cap  { stroke: var(--amber); }
+
+/* ── State: REJECTED ──────────────────────────────────── */
+.s-rejected .arr-ok  { stroke: var(--stRejDimArrow); opacity: 0.3; }
+.s-rejected .hd-ok   { fill: var(--stRejDimArrow); opacity: 0.3; }
+.s-rejected .arr-err { stroke: var(--red); opacity: 1; animation: flowDash 0.75s linear infinite; }
+.s-rejected .hd-err  { fill: var(--red); opacity: 1; }
+.s-rejected .hex-shape  { stroke: var(--red); }
+.s-rejected .active-dot { fill: var(--red); }
+.s-rejected .err-rect   { opacity: 1; stroke: var(--red); }
+.s-rejected .err-label  { opacity: 1; fill: var(--red); }
+
+/* Bypassed: active dot turns teal */
+.s-bypassed .active-dot { fill: var(--teal); }
+
+@keyframes flowDash { to { stroke-dashoffset: -26; } }
+
+/* ── Existing doc in collection ───────────────────────── */
+.existing-doc  { opacity: 0; transition: opacity 0.3s; pointer-events: none; }
+.wt-update .existing-doc { opacity: 1; pointer-events: auto; }
+
+.exist-card { stroke-width: 1.5; transition: stroke 0.25s, fill 0.25s; }
+.exist-line { transition: fill 0.25s; }
+.exist-badge { transition: fill 0.25s; }
+
+.exist-badge-text { font-size: 8px; font-weight: 800; font-family: inherit; transition: fill 0.25s; }
+
+.exist-status { font-size: 9px; font-weight: 600; font-family: inherit; }
+.exist-status-valid   { opacity: 0; transition: opacity 0.25s; }
+.exist-status-invalid { opacity: 0; transition: opacity 0.25s; }
+.ev-valid   .exist-status-valid   { opacity: 1; }
+.ev-invalid .exist-status-invalid { opacity: 1; }
+
+/* Result pills on existing doc */
+.exist-result-ok,
+.exist-result-bypassed,
+.exist-result-warn,
+.exist-result-no { opacity: 0; transition: opacity 0.3s; }
+
+.wt-update.s-accepted  .exist-result-ok       { opacity: 1; }
+.wt-update.s-bypassed  .exist-result-bypassed  { opacity: 1; }
+.wt-update.s-warned    .exist-result-warn      { opacity: 1; }
+.wt-update.s-rejected  .exist-result-no        { opacity: 1; }
+
+/* ── Status card ──────────────────────────────────────── */
+.status-card { padding: 22px 28px; }
+
+.status-top {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.status-badge {
+  display: inline-block;
+  font-size: 1.1rem;
+  font-weight: 800;
+  padding: 8px 22px;
+  border-radius: 26px;
+  letter-spacing: -0.01em;
+  transition: background 0.25s, color 0.25s, border-color 0.25s;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.status-badge.accepted { background: var(--acceptedBg); color: var(--acceptedText); border: 1.5px solid var(--acceptedBorder); }
+.status-badge.bypassed { background: var(--bypassedBg); color: var(--bypassedText); border: 1.5px solid var(--bypassedBorder); }
+.status-badge.warned   { background: var(--warnedBg); color: var(--warnedText); border: 1.5px solid var(--warnedBorder); }
+.status-badge.rejected { background: var(--rejectedBg); color: var(--rejectedText); border: 1.5px solid var(--rejectedBorder); }
+
+.status-texts { flex: 1; min-width: 0; }
+
+.status-expl {
+  font-size: 0.875rem;
+  color: var(--textSecondary);
+  line-height: 1.65;
+}
+.status-expl strong { color: var(--textStrong); }
+.status-expl em     { color: var(--textEm); font-style: normal; font-weight: 600; }
+
+.status-consequence {
+  margin-top: 8px;
+  font-size: 0.8rem;
+  color: var(--textDim);
+  line-height: 1.5;
+  padding-left: 10px;
+  border-left: 2px solid var(--borderSubtle);
+}
+.status-consequence strong { color: var(--textSecondary); }
+
+/* Insight badge */
+.insight-badge {
+  display: none;
+  margin-top: 10px;
+  padding: 8px 12px;
+  background: var(--insightBg);
+  border: 1px solid var(--insightBorder);
+  border-left: 3px solid var(--insightBorderLeft);
+  border-radius: 6px;
+  font-size: 0.8rem;
+  color: var(--insightText);
+  line-height: 1.5;
+}
+.insight-badge strong { color: var(--insightStrong); }
+.insight-badge.visible { display: block; }
+.insight-badge::before { content: '\26A1 '; }
+
+/* MongoDB command snippet */
+.mongo-cmd {
+  margin-top: 14px;
+  border: 1px solid var(--cmdBorder);
+  border-radius: 8px;
+  overflow: hidden;
+}
+.mongo-cmd summary {
+  padding: 8px 14px;
+  font-size: 0.78rem;
+  color: var(--textMuted);
+  cursor: pointer;
+  background: var(--cmdHeaderBg);
+  user-select: none;
+  list-style: none;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.mongo-cmd summary::before { content: '\25B6'; font-size: 0.6rem; transition: transform 0.2s; }
+.mongo-cmd[open] summary::before { transform: rotate(90deg); }
+.mongo-cmd summary:hover { color: var(--textSecondary); }
+.mongo-cmd pre {
+  margin: 0;
+  padding: 14px 16px;
+  background: var(--codeBg);
+  font-family: 'SF Mono', 'Fira Code', monospace;
+  font-size: 0.78rem;
+  color: var(--cmdCodeText);
+  line-height: 1.7;
+  overflow-x: auto;
+}
+.cmd-key    { color: var(--cmdKey); }
+.cmd-str    { color: var(--cmdStr); }
+.cmd-comment { color: var(--cmdComment); }
+
+/* ── Footer ──────────────────────────────────────────── */
+footer { font-size: 0.7rem; color: var(--footerText); text-align: center; line-height: 1.8; }
+footer a { color: var(--footerLink); text-decoration: underline; }
+footer a:hover { color: var(--footerLinkHover); }
+
+/* ── Tooltip ─────────────────────────────────────────── */
+#tooltip {
+  position: fixed;
+  background: var(--tooltipBg);
+  border: 1px solid var(--tooltipBorder);
+  border-radius: 10px;
+  padding: 12px 16px;
+  font-size: 0.78rem;
+  color: var(--textSecondary);
+  max-width: 290px;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+  z-index: 200;
+  line-height: 1.6;
+  box-shadow: var(--tooltipShadow);
+}
+#tooltip.visible { opacity: 1; }
+#tooltip strong { color: var(--textBright); }
+#tooltip code {
+  font-family: 'SF Mono', 'Fira Code', monospace;
+  font-size: 0.82em;
+  background: var(--tooltipCodeBg);
+  color: var(--green);
+  padding: 1px 5px;
+  border-radius: 3px;
+}
+.tip-row {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin-top: 5px;
+}
+.tip-label {
+  color: var(--textMuted);
+  font-size: 0.7rem;
+  font-family: 'SF Mono', 'Fira Code', monospace;
+  white-space: nowrap;
+}
+.tip-desc {
+  color: var(--textDim);
+  font-size: 0.74rem;
+  margin-top: 4px;
+  line-height: 1.5;
+}
+.tip-node { cursor: help; }
+
+/* ── Responsive ──────────────────────────────────────── */
+@media (max-width: 600px) {
+  h1 { font-size: 1.3rem; }
+  .diagram-card { padding: 16px; }
+  .controls-grid { grid-template-columns: 1fr; gap: 14px; }
+  .ctrl-col + .ctrl-col { border-left: none; border-top: 1px solid var(--borderSubtle); padding-left: 0; padding-top: 14px; }
+  .status-top { flex-direction: column; }
+}
